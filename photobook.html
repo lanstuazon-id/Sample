@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Our Photobook ❤️</title>
+  <style>
+    :root {
+      --bg: #2c1f3e;
+      --book-bg: #fdfcff;
+      --page-bg: #f7f3fa;
+      --text-color: #4a2f5a;
+      --accent: #a259c1;
+      --shadow: rgba(44, 31, 62, 0.2);
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, 'Helvetica Neue', Arial;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    .book-container {
+      width: min(1200px, 95vw);
+      aspect-ratio: 16/9;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .book {
+      flex-grow: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: var(--book-bg);
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 15px 40px var(--shadow), 0 0 0 1px rgba(0,0,0,0.1);
+      position: relative;
+      perspective: 1800px;
+    }
+
+    .page {
+      background: var(--page-bg);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.04);
+      position: relative;
+      z-index: 1;
+      visibility: hidden; /* Pages are hidden until book is open */
+    }
+
+    .book.open .page {
+      visibility: visible;
+    }
+
+    .cover {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      width: calc(100% - 30px);
+      height: calc(100% - 30px);
+      transform-style: preserve-3d;
+      transform-origin: left;
+      transition: transform 1s cubic-bezier(0.65, 0, 0.35, 1);
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    .book.open .cover {
+      transform: rotateY(-180deg);
+    }
+
+    .cover-front, .cover-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 6px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+    
+    .cover-front {
+      /* The design should span the entire cover now */
+      width: 100%;
+    }
+
+    .cover-back {
+      transform: rotateY(180deg);
+    }
+
+    .flipping-page {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      width: calc(50% - 20px);
+      height: calc(100% - 30px);
+      transform-style: preserve-3d;
+      transition: transform 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+      transform-origin: left;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .flipping-page.turn {
+      transform: rotateY(-180deg);
+    }
+
+    .flipping-page.reverse {
+      transform-origin: right;
+      right: auto;
+      left: 15px;
+      transform: rotateY(-180deg);
+      z-index: 11; /* Appear above the left page */
+    }
+
+    .flipping-page.reverse.turn-back {
+      transform: rotateY(0deg);
+    }
+
+    .flipping-page .front, .flipping-page .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      background: var(--page-bg);
+      border-radius: 6px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .flipping-page .back {
+      transform: rotateY(180deg);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    }
+
+    .page-content {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 15px;
+    }
+
+    .photo-placeholder {
+      flex-grow: 1;
+      background: #e6dff0;
+      border-radius: 4px;
+      display: grid;
+      place-items: center;
+      color: #b5a9c4;
+      font-size: 1.5rem;
+      font-weight: 600;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .photo-placeholder img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .caption {
+      text-align: center;
+      color: var(--text-color);
+      font-size: 0.9rem;
+      height: 40px; /* Reserve space for 2 lines */
+      line-height: 1.4;
+    }
+
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 10px 10px;
+      color: white;
+      transition: opacity 0.5s 0.2s;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: 2px solid rgba(255,255,255,0.4);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(255,255,255,0.6);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .page-counter {
+      font-weight: 500;
+      font-size: 1rem;
+      opacity: 0.8;
+    }
+
+    .home-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      background: rgba(255,255,255,0.1);
+      padding: 8px 14px;
+      border-radius: 20px;
+      transition: background 0.2s ease;
+    }
+    .home-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .volume-control {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 30;
+    }
+
+    #volume-icon {
+      font-size: 24px;
+      cursor: pointer;
+      color: white;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      user-select: none;
+    }
+
+    #volume-icon:hover {
+      opacity: 1;
+    }
+
+    #volume-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 80px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      outline: none;
+      transition: opacity 0.2s;
+    }
+
+    #volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .book { grid-template-columns: 1fr; position: relative; }
+      .page.right-page { display: none; }
+      .book-container { aspect-ratio: 3/4; }
+      .volume-control { display: none; } /* Hide on small screens for simplicity */
+    }
+  </style>
+  <style> /* Cover specific styles */
+    .cover-front {
+      background: linear-gradient(45deg, #8e44ad, #a259c1), var(--book-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
+    }
+    .cover-front h2 {
+      margin: 0;
+      font-size: 2.5rem;
+      font-family: 'Playfair Display', serif;
+    }
+    .cover-front p {
+      margin: 8px 0 0;
+      font-style: italic;
+      opacity: 0.8;
+    }
+    .cover-back {
+      background: var(--page-bg);
+    }
+  </style>
+</head>
+<body>
+
+  <a href="letter.html" class="home-btn">Back to Letter</a>
+  
+  <div class="volume-control">
+    <span id="volume-icon">🔊</span>
+    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5">
+  </div>
+
+  <audio id="background-music" loop>
+    <!-- Create a 'music' folder and place your audio file (e.g., music.mp3) inside it -->
+    <source src="Ariana_Grande_-_Pov.mp3" type="audio/mpeg">
+    <!-- <source src="music/music.mp3" type="audio/mpeg"> -->
+    Your browser does not support the audio element.
+  </audio>
+
+  <div class="book-container">
+    <div class="book">
+      <div class="cover" id="cover">
+        <div class="cover-front">
+          <div>
+            <h2>Our Photobook</h2>
+            <p>Click to open</p>
+          </div>
+        </div>
+        <div class="cover-back"></div>
+      </div>
+      <div class="page left-page">
+        <div class="page-content" id="cover-inside-content">
+          <div class="photo-placeholder" id="left-photo"></div>
+          <p class="caption" id="left-caption"></p>
+        </div>
+      </div>
+      <div class="page right-page">
+        <div class="page-content">
+          <div class="photo-placeholder" id="right-photo"></div>
+          <p class="caption" id="right-caption"></p>
+        </div>
+      </div>
+      
+      <!-- This is the element that will animate the page turn -->
+      <div class="flipping-page" id="flipping-page">
+        <div class="front">
+          <div class="page-content" id="flip-front-content"></div>
+        </div>
+        <div class="back">
+          <div class="page-content" id="flip-back-content"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="navigation">
+      <button class="nav-btn" id="prev-btn" style="visibility: hidden;">Previous</button>
+      <span class="page-counter" id="page-counter"></span>
+      <button class="nav-btn" id="next-btn">Next</button>
+    </div>
+  </div>
+
+<script>
+  // --- EDIT YOUR PHOTOS AND CAPTIONS HERE ---
+  // Add 50 items to this array.
+  // For each item, 'image' is the path to your photo and 'caption' is the text below it.
+  // Example: { image: 'photos/our-first-date.jpg', caption: 'Our first date! ❤️' }
+  const pagesData = [
+    { image: 'photos/ag7 2.jpg', caption: 'Our first memory together! ❤️' },
+    { image: 'photos/ariana-grande-positions-cd-artwork-photo-0.jpg', caption: 'Another special moment.' },
+    { image: 'IMG_2587.jpg', caption: 'Never forget this day!' },
+    { image: 'photos/ag7 2.jpg', caption: 'Our first memory together! ❤️' },
+    { image: 'photos/ariana-grande-positions-cd-artwork-photo-0.jpg', caption: 'Another special moment.' },
+    { image: 'IMG_2587.jpg', caption: 'Never forget this day!' }
+    // Add more photos here following the same format
+  ];
+  // -----------------------------------------
+
+  let currentPageIndex = 0;
+  let isFlipping = false;
+  const book = document.querySelector('.book');
+  const music = document.getElementById('background-music');
+  const leftPhoto = document.getElementById('left-photo');
+  const leftCaption = document.getElementById('left-caption');
+  const rightPhoto = document.getElementById('right-photo');
+  const rightCaption = document.getElementById('right-caption');
+  const pageCounter = document.getElementById('page-counter');
+  
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  const cover = document.getElementById('cover');
+
+  const volumeIcon = document.getElementById('volume-icon');
+  const volumeSlider = document.getElementById('volume-slider');
+  let lastVolume = 0.5;
+  
+  const flippingPage = document.getElementById('flipping-page');
+  const flipFrontContent = document.getElementById('flip-front-content');
+  const flipBackContent = document.getElementById('flip-back-content');
+
+  function createPageContent(data, pageNum) {
+    const imageHTML = data.image ? `<img src="${data.image}" alt="${data.caption}">` : `Page ${pageNum}`;
+    return `
+      <div class="photo-placeholder">${imageHTML}</div>
+      <p class="caption">${data.caption}</p>
+    `;
+  }
+
+  function updateBook(instant = false) {
+    if (!book.classList.contains('open')) {
+      prevBtn.style.visibility = 'hidden';
+      nextBtn.style.visibility = 'hidden';
+      pageCounter.textContent = '';
+      return;
+    }
+    // Left page is now the inside of the cover or a content page
+    const leftData = pagesData[currentPageIndex - 1];
+    if (leftData) {
+      leftPhoto.innerHTML = leftData.image ? `<img src="${leftData.image}" alt="${leftData.caption}">` : `Page ${currentPageIndex}`;
+      leftCaption.textContent = leftData.caption;
+    } else {
+      // This is the inside of the cover
+      leftPhoto.innerHTML = '';
+      leftCaption.textContent = '';
+    }
+
+    // Right page is the next page
+    const rightData = pagesData[currentPageIndex];
+    if (rightData) {
+      rightPhoto.innerHTML = rightData.image ? `<img src="${rightData.image}" alt="${rightData.caption}">` : `Page ${currentPageIndex + 1}`;
+      rightCaption.textContent = rightData.caption;
+      document.querySelector('.right-page').style.visibility = 'visible';
+    } else {
+      document.querySelector('.right-page').style.visibility = 'hidden';
+    }
+
+    // Update navigation
+    prevBtn.style.visibility = 'visible';
+    nextBtn.style.visibility = 'visible';
+    const pageText = leftData ? `${currentPageIndex}-${currentPageIndex + 1}` : `1`;
+    pageCounter.textContent = `Page ${pageText} of ${pagesData.length}`;
+    prevBtn.disabled = currentPageIndex === 0;
+    nextBtn.disabled = currentPageIndex >= pagesData.length -1;
+  }
+
+  prevBtn.addEventListener('click', () => {
+    if (isFlipping) return;
+
+    if (currentPageIndex === 0) {
+      // Close the book
+      book.classList.remove('open');
+      music.pause(); // Pause the music
+      isFlipping = true;
+      setTimeout(() => {
+        isFlipping = false;
+        updateBook(true);
+      }, 1000);
+      return;
+    }
+
+    if (currentPageIndex <= 0) return;
+
+    isFlipping = true;
+
+    // Hide the static left page content
+    document.querySelector('.left-page').style.visibility = 'hidden';
+    
+    // 1. Prepare the flipping page content for reverse flip
+    const prevLeftData = pagesData[currentPageIndex - 1];
+    const prevRightData = pagesData[currentPageIndex];
+
+    flipFrontContent.innerHTML = createPageContent(prevRightData, currentPageIndex + 1);
+    flipBackContent.innerHTML = createPageContent(prevLeftData, currentPageIndex);
+
+    // 2. Position the flipping page for reverse animation
+    flippingPage.classList.add('reverse');
+
+    // 3. Start the animation
+    setTimeout(() => {
+      flippingPage.classList.add('turn-back');
+    }, 10); // Small delay to ensure CSS is applied
+
+    // 4. After animation, update the book state
+    setTimeout(() => {
+      currentPageIndex -= 2;
+      updateBook(true);
+
+      // Reset the flipping page
+      flippingPage.classList.remove('reverse', 'turn-back');
+      document.querySelector('.left-page').style.visibility = 'visible';
+      isFlipping = false;
+    }, 810); // Must match the transition duration
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if (currentPageIndex >= pagesData.length -1 || isFlipping) {
+      return;
+    }
+    isFlipping = true;
+
+    // 1. Prepare the flipping page content
+    const currentRightData = pagesData[currentPageIndex];
+    const nextLeftData = pagesData[currentPageIndex + 1];
+    
+    flipFrontContent.innerHTML = createPageContent(currentRightData, currentPageIndex + 1);
+    flipBackContent.innerHTML = createPageContent(nextLeftData, currentPageIndex + 2);
+
+    // Hide the static right page content
+    document.querySelector('.right-page').style.visibility = 'hidden';
+
+    // 2. Start the animation
+    flippingPage.classList.add('turn');
+
+    // 3. After animation, update the book state
+    setTimeout(() => {
+      currentPageIndex += 2;
+      updateBook(true);
+
+      // Reset the flipping page
+      flippingPage.classList.remove('turn');
+      
+      // Make sure the right page is visible again for the next turn
+      if (currentPageIndex < pagesData.length -1) {
+        document.querySelector('.right-page').style.visibility = 'visible';
+      }
+      isFlipping = false;
+    }, 800); // Must match the transition duration in CSS
+  });
+
+  cover.addEventListener('click', () => {
+    if (isFlipping || book.classList.contains('open')) return;
+    isFlipping = true;
+    book.classList.add('open');
+    music.play(); // Play the music
+    setTimeout(() => {
+      isFlipping = false;
+      updateBook(true);
+    }, 1000); // Corresponds to cover animation
+  });
+
+  // Initial load
+  music.volume = volumeSlider.value;
+  updateBook(true); // Initially hides nav
+
+  // --- Volume Control Logic ---
+  function updateVolumeIcon(volume) {
+    if (volume == 0) {
+      volumeIcon.textContent = '🔇';
+    } else if (volume < 0.5) {
+      volumeIcon.textContent = '🔉';
+    } else {
+      volumeIcon.textContent = '🔊';
+    }
+  }
+
+  volumeSlider.addEventListener('input', (e) => {
+    const newVolume = parseFloat(e.target.value);
+    music.volume = newVolume;
+    updateVolumeIcon(newVolume);
+  });
+
+  volumeIcon.addEventListener('click', () => {
+    if (music.volume > 0) {
+      lastVolume = music.volume;
+      music.volume = 0;
+      volumeSlider.value = 0;
+    } else {
+      music.volume = lastVolume > 0 ? lastVolume : 0.5;
+      volumeSlider.value = music.volume;
+    }
+    updateVolumeIcon(music.volume);
+  });
+</script>
+
+</body>
+</html>

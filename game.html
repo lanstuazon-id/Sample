@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Memory Match Game ❤️</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1: linear-gradient(135deg, #d4b2e8 0%, #e6d4f0 40%, #f9f4fc 100%);
+      --accent: #a259c1;
+      --accent-light: #f3e8ff;
+      --card-bg: #fff;
+      --text-color: #4a2f5a;
+      --shadow: 0 8px 30px rgba(44, 31, 62, 0.12);
+      --radius: 28px;
+      font-family: 'Poppins', 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background: var(--bg1);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:center;
+      justify-content: stretch; /* Stretch content */
+      padding:0; /* Remove padding */
+      box-sizing: border-box;
+      overflow: hidden;
+      position: relative;
+      color: var(--text-color);
+    }
+
+    body::before, body::after {
+      content: '';
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      filter: blur(100px);
+      z-index: -1;
+    }
+    body::before {
+      background: radial-gradient(circle, rgba(162, 89, 193, 0.15), transparent 60%);
+      top: -10%;
+      left: -10%;
+      animation: move-aurora1 20s infinite alternate;
+    }
+    body::after {
+      background: radial-gradient(circle, rgba(255, 192, 203, 0.2), transparent 60%);
+      bottom: -10%;
+      right: -10%;
+      animation: move-aurora2 25s infinite alternate;
+    }
+    @keyframes move-aurora1 {
+      to { transform: translate(100px, 200px); }
+    }
+    @keyframes move-aurora2 {
+      to { transform: translate(-200px, -100px); }
+    }
+    
+    .btn{padding:10px 14px;border-radius:12px;border:0;cursor:pointer;font-weight:600}
+    .btn{transition: transform .2s ease, box-shadow .2s ease;}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+    .btn:active{transform:translateY(0) scale(0.96);box-shadow:none}
+    .btn.pink{background:var(--accent);color:white}
+    .btn.pink:hover{box-shadow:0 4px 12px rgba(162, 89, 193, 0.2)}
+    .btn.ghost{background:transparent;border:1px solid rgba(74, 47, 90, 0.1);color:var(--text-color)}
+    .btn.ghost:hover { background: rgba(74, 47, 90, 0.05); }
+
+    .home-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: var(--text-color);
+      text-decoration: none;
+      font-weight: 600;
+      background: rgba(255,255,255,0.4);
+      padding: 8px 14px;
+      border-radius: 20px;
+      transition: background 0.2s ease;
+    }
+    .home-btn:hover {
+      background: rgba(255,255,255,0.6);
+    }
+
+    .game-layout {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      grid-template-rows: auto 1fr;
+    }
+
+    .game-sidebar {
+      grid-row: 1 / -1;
+      background: rgba(0,0,0,0.1);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .game-container h3 { 
+      margin: 0 0 20px; 
+      text-align: center; 
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      letter-spacing: 1px;
+    }
+
+    .game-board-area {
+      grid-column: 2;
+      grid-row: 1 / -1;
+      display: grid;
+      place-items: center;
+      padding: 2rem;
+    }
+
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5vw;
+      perspective: 1000px;
+      width: min(80vh, 70vw);
+    }
+    .memory-card {
+      background-color: transparent;
+      aspect-ratio: 1/1;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.3s;
+    }
+    .memory-card.flip {
+      transform: rotateY(180deg);
+    }
+    .memory-card.matched {
+      pointer-events: none;
+    }
+    .memory-card.matched .card-front {
+      box-shadow: 0 0 20px var(--accent);
+      background: var(--accent-light);
+      color: #3b0764;
+    }
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 2.5rem;
+      transition: background .3s, box-shadow .3s;
+    }
+    .card-back {
+      background: linear-gradient(135deg, #e6d4f0, #d4b2e8);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .card-back::before {
+      content: '?';
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      color: white;
+      opacity: 0.5;
+    }
+    .card-front {
+      background: #f9f4fc;
+      transform: rotateY(180deg);
+      color: var(--accent);
+    }
+    .game-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .game-timer, .moves-counter {
+      color: #634b70;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    .high-score-display {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+      color: #754f8a;
+      background: #f9f4fc;
+      padding: 8px;
+      border-radius: 8px;
+    }
+    .game-description {
+      text-align: center;
+      color: #634b70;
+      margin: 0 0 15px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+    .win-message-overlay {
+      position: absolute;
+      inset: 28px; /* Match container padding */
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 100;
+      display: none; /* Hidden by default */
+      place-items: center;
+      border-radius: var(--radius);
+      text-align: center;
+      color: var(--text-color);
+    }
+    .win-message-box h2 {
+      margin: 0 0 20px;
+      font-size: 2.2rem;
+      font-family: 'Playfair Display', serif;
+    }
+    .win-message-box .close-btn {
+      color: var(--text-color);
+      opacity: 0.6;
+    }
+    .win-message-box .close-btn:hover {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <a href="letter.html" class="home-btn">← Back to Letter</a>
+  
+  <div class="game-layout">
+    <aside class="game-sidebar">
+      <div>
+        <h3 id="game-title">Memory Match Game</h3>
+        <p id="game-description">Find all the matching pairs before the 60-second timer runs out. Good luck!</p>
+        <div class="high-score-display">
+          <span>Best Moves: <span id="best-moves">--</span></span>
+          <span>Fastest Time: <span id="best-time">--s</span></span>
+        </div>
+        <div class="game-stats">
+          <div id="moves-counter" class="moves-counter">Moves: 0</div>
+          <div id="game-timer" class="game-timer">Time: 60s</div>
+        </div>
+      </div>
+      <div class="game-controls" style="display: flex; flex-direction: column; gap: 10px;">
+        <button id="start-game-btn" class="btn pink">Start Game</button>
+        <button id="restart-game-btn" class="btn ghost" style="display: none;">Restart Game</button>
+      </div>
+    </aside>
+
+    <main class="game-board-area">
+      <div class="memory-grid" id="memory-grid">
+        <!-- Game cards will be generated here by JavaScript -->
+      </div>
+      <div id="win-message-overlay" class="win-message-overlay">
+        <div class="win-message-box">
+          <button class="close-btn" onclick="closeWinMessage()">&times;</button>
+          <h2 id="win-message-text">You Win!</h2>
+          <button id="win-restart-btn" class="btn pink">Play Again</button>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Sound Effects for the Game -->
+  <!-- Create a 'sounds' folder and place your audio files inside it -->
+  <audio id="flip-sound" src="flip.mp3" preload="auto"></audio>
+  <audio id="match-sound" src="matched.mp3" preload="auto"></audio>
+  <audio id="win-sound" src="winner.mp3" preload="auto"></audio>
+
+  <script>
+    const memoryGrid = document.getElementById('memory-grid');
+    const gameTitle = document.getElementById('game-title');
+    const timerDisplay = document.getElementById('game-timer');
+    const winMessageOverlay = document.getElementById('win-message-overlay');
+    const winMessageText = document.getElementById('win-message-text');
+    const winRestartBtn = document.getElementById('win-restart-btn');
+    const flipSound = document.getElementById('flip-sound');
+    const matchSound = document.getElementById('match-sound');
+    const winSound = document.getElementById('win-sound');
+    const gameDescription = document.getElementById('game-description');
+    const bestMovesDisplay = document.getElementById('best-moves');
+    const bestTimeDisplay = document.getElementById('best-time');
+    const movesDisplay = document.getElementById('moves-counter');
+    const startBtn = document.getElementById('start-game-btn');
+    const restartBtn = document.getElementById('restart-game-btn');
+    const icons = ['❤️', '⭐', '🎁', '💌', '💍', '🎶', '💖', '✨', '❤️', '⭐', '🎁', '💌', '💍', '🎶', '💖', '✨'];
+    let flippedCards = [];
+    let matchedPairs = 0;
+    let moves = 0;
+    let lockBoard = false;
+    let timerInterval;
+    let secondsRemaining = 60;
+    const BEST_MOVES_KEY = 'memoryGameBestMoves';
+    const BEST_TIME_KEY = 'memoryGameBestTime';
+
+    function shuffle(array) {
+      array.sort(() => Math.random() - 0.5);
+    }
+
+    function createBoard() {
+      shuffle(icons);
+      memoryGrid.innerHTML = '';
+      gameTitle.textContent = 'Memory Match Game';
+      timerDisplay.textContent = 'Time: 60s';
+      movesDisplay.textContent = 'Moves: 0';
+      lockBoard = false;
+      moves = 0;
+      matchedPairs = 0;
+      icons.forEach(icon => {
+        const card = document.createElement('div');
+        card.classList.add('memory-card');
+        card.dataset.icon = icon;
+        card.innerHTML = `
+          <div class="card-front">${icon}</div>
+          <div class="card-back"></div>
+        `;
+        card.addEventListener('click', flipCard);
+        memoryGrid.appendChild(card);
+      });
+    }
+
+    function flipCard() {
+      if (lockBoard || this.classList.contains('flip')) return;
+      flipSound.currentTime = 0;
+      flipSound.play();
+      this.classList.add('flip');
+      flippedCards.push(this);
+      if (flippedCards.length === 2) {
+        checkForMatch();
+      }
+    }
+
+    function checkForMatch() {
+      lockBoard = true;
+      moves++;
+      movesDisplay.textContent = `Moves: ${moves}`;
+      const [card1, card2] = flippedCards;
+      if (card1.dataset.icon === card2.dataset.icon) {
+        matchSound.currentTime = 0;
+        matchSound.play();
+        card1.classList.add('matched');
+        card2.classList.add('matched');
+        matchedPairs++;
+        flippedCards = [];
+        lockBoard = false;
+        if (matchedPairs === icons.length / 2) {
+          clearInterval(timerInterval);
+          winSound.play();
+          const timeTaken = 60 - secondsRemaining;
+
+          let bestMoves = localStorage.getItem(BEST_MOVES_KEY) || Infinity;
+          let bestTime = localStorage.getItem(BEST_TIME_KEY) || Infinity;
+
+          if (moves < bestMoves) {
+            localStorage.setItem(BEST_MOVES_KEY, moves);
+          }
+          if (timeTaken < bestTime) {
+            localStorage.setItem(BEST_TIME_KEY, timeTaken);
+          }
+
+          loadHighScores();
+
+          setTimeout(() => {
+            winMessageText.textContent = `You Win in ${moves} moves! 🎉`;
+            winMessageOverlay.style.display = 'grid';
+          }, 500);
+        }
+      } else {
+        setTimeout(() => {
+          card1.classList.remove('flip');
+          card2.classList.remove('flip');
+          flippedCards = [];
+          lockBoard = false;
+        }, 800);
+      }
+    }
+    
+    function startTimer() {
+      secondsRemaining = 60;
+      timerDisplay.textContent = `Time: ${secondsRemaining}s`;
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        secondsRemaining--;
+        timerDisplay.textContent = `Time: ${secondsRemaining}s`;
+        if (secondsRemaining <= 0) {
+          clearInterval(timerInterval);
+          gameTitle.textContent = "Time's Up!";
+          lockBoard = true; // Lock the board so no more cards can be flipped
+        }
+      }, 1000);
+    }
+
+    function startGame() {
+      startBtn.style.display = 'none';
+      restartBtn.style.display = 'inline-block';
+      gameDescription.style.display = 'none';
+      createBoard();
+      startTimer();
+    }
+    
+    function loadHighScores() {
+      const bestMoves = localStorage.getItem(BEST_MOVES_KEY);
+      const bestTime = localStorage.getItem(BEST_TIME_KEY);
+      bestMovesDisplay.textContent = bestMoves ? bestMoves : '--';
+      bestTimeDisplay.textContent = bestTime ? `${bestTime}s` : '--s';
+      winMessageOverlay.style.display = 'none';
+      gameDescription.style.display = 'block';
+    }
+    
+    function closeWinMessage() {
+      winMessageOverlay.style.display = 'none';
+    }
+
+    // Initial setup
+    loadHighScores();
+    startBtn.addEventListener('click', startGame);
+    restartBtn.addEventListener('click', startGame);
+    winRestartBtn.addEventListener('click', startGame);
+
+  </script>
+</body>
+</html>

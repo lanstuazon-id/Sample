@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>For Raiza ❤️</title>
+  <style>
+    :root{
+      --bg1: linear-gradient(135deg, #d4b2e8 0%, #e6d4f0 40%, #f9f4fc 100%);
+      --accent: #a259c1;
+      --card: rgba(255, 255, 255, 0.85);
+      --glass: rgba(255, 255, 255, 0.4);
+      --shadow: 0 8px 30px rgba(44, 31, 62, 0.12);
+      --radius: 18px;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, 'Helvetica Neue', Arial;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background: var(--bg1);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:2rem;
+    }
+
+    .container{
+      width:min(980px,96vw);
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap:28px;
+      align-items:stretch;
+    }
+
+    /* Left big card */
+    .card{
+      background: var(--card);
+      border-radius:var(--radius);
+      padding:28px;
+      box-shadow:var(--shadow);
+      position:relative;
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+
+    .title{
+      display:flex;
+      gap:16px;
+      align-items:center;
+    }
+
+    .heart{
+      width:72px;height:72px;border-radius:18px;
+      background: conic-gradient(from 120deg at 50% 50%, #c391e0, var(--accent) 60%);
+      display:grid;place-items:center;color:white;font-weight:700;font-size:28px;
+      box-shadow:0 8px 20px rgba(162, 89, 193, 0.2);
+      transform:rotate(-12deg);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float{
+      0%{ transform:translateY(0) rotate(-12deg)}
+      50%{ transform:translateY(-8px) rotate(-8deg)}
+      100%{ transform:translateY(0) rotate(-12deg)}
+    }
+
+    h1{
+      margin:0;font-size:2rem;color:#4a2f5a;
+      letter-spacing: -0.02em;
+    }
+
+    p.lead{ margin:12px 0 18px;color:#634b70;opacity:0.95;line-height:1.45;font-size:1rem; }
+
+    .message{
+      background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.35));
+      border-radius:12px;padding:16px;margin-top:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+
+    .small-cta{display:flex;gap:12px;margin-top:18px}
+    .btn{padding:10px 14px;border-radius:12px;border:0;cursor:pointer;font-weight:600}
+    .btn{transition: transform .2s ease, box-shadow .2s ease;}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+    .btn:active{transform:translateY(0) scale(0.96);box-shadow:none}
+    .btn.pink{background:var(--accent);color:white}
+    .btn.pink:hover{box-shadow:0 4px 12px rgba(162, 89, 193, 0.2)}
+    .btn.ghost{background:transparent;border:1px solid rgba(74, 47, 90, 0.1);color:#4a2f5a}
+
+    /* Photo placeholder style */
+    .photo-frame{width:64px;height:64px;border-radius:12px;background:linear-gradient(180deg,#fff,#ffeef6);padding:0;overflow:hidden;border:2px solid white;box-shadow:0 4px 10px rgba(0,0,0,0.05)}
+
+    /* Right column */
+    .side{
+      align-self:start;display:flex;flex-direction:column;gap:18px;
+    }
+
+    .mini-card{
+      background:var(--glass);backdrop-filter: blur(6px);
+      border-radius:14px;padding:18px;box-shadow:var(--shadow);
+    }
+
+    .name-big{font-size:1.6rem;margin:0;color:#4a2f5a}
+    .nick{color:#754f8a;font-weight:700;margin-left:6px}
+
+    .stats{display:flex;gap:10px;margin-top:10px}
+    .stat{flex:1;background:rgba(255,255,255,0.6);padding:10px;border-radius:10px;text-align:center}
+    .stat strong{display:block;font-size:18px}
+    .stat span{font-size:12px;color:#634b70}
+
+    /* Little animated love notes */
+    .notes{display:flex;flex-direction:column;gap:10px}
+    .note{background:linear-gradient(90deg, rgba(255,255,255,0.7), rgba(255,255,255,0.55));padding:12px;border-radius:12px;transition: transform .2s ease, box-shadow .2s ease;cursor:default;}
+    .note:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,0.07)}
+
+    footer{margin-top:18px;font-size:13px;color:#634b70;opacity:0.9}
+
+    /* Floating hearts background */
+    .bg-hearts{position:absolute;inset:0;pointer-events:none;opacity:0.18}
+    .bg-hearts i{position:absolute;font-style:normal;font-size:38px;animation: float-bg 15s infinite}
+    @keyframes float-bg{
+      0%{transform:translateY(0) rotate(0);opacity:0.8}
+      50%{transform:translateY(-80px) rotate(20deg);opacity:0.2}
+      100%{transform:translateY(0) rotate(0);opacity:0.8}
+    }
+    .bg-hearts i:nth-child(2){animation-delay: 4s; animation-duration: 20s;}
+    .bg-hearts i:nth-child(3){animation-delay: 8s; animation-duration: 12s;}
+
+    .bg-hearts i.h1{top:10%;left:5%}
+    .bg-hearts i.h2{top:40%;right:6%}
+    .bg-hearts i.h3{bottom:8%;left:20%}
+
+    /* Responsive */
+    @media (max-width:880px){
+      .container{grid-template-columns:1fr;}
+      .heart{width:60px;height:60px}
+    }
+
+    /* Cute cursive signature */
+    .signature{font-family: 'Brush Script MT', 'Brush Script Std', cursive;font-size:1.2rem;color:var(--accent)}
+
+    /* subtle entrance animation */
+    .reveal{opacity:0;transform:translateY(8px);animation: reveal .6s forwards}
+    .reveal.delay{animation-delay:.18s}
+    @keyframes reveal{to{opacity:1;transform:none}}
+
+    /* Mood Slider Styles */
+    .mood-slider-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+    }
+    .mood-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(90deg, #f9f4fc, #e6d4f0);
+      border-radius: 4px;
+      outline: none;
+      opacity: 0.8;
+      transition: opacity .2s;
+    }
+    .mood-slider:hover {
+      opacity: 1;
+    }
+    .mood-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: 4px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .mood-slider::-moz-range-thumb {
+      width: 14px; /* 22px - 4px*2 border */
+      height: 14px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+      border: 4px solid white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <main class="card reveal">
+      <div class="title">
+        <div class="heart">💕</div>
+        <div>
+          <h1>For Babi</h1>
+          <p class="lead">A tiny webpage made with a big ❤️ — just for you. Open, smile, and remember you're loved.</p>
+        </div>
+      </div>
+
+      <div class="message">
+        <p>Hi <strong>Babi</strong>,</p>
+        <p>I made this little corner of the web to remind you how special you are. Every time you see this page, think of a warm hug, a silly laugh, and the sweetest memories.</p>
+        <p style="margin:0.6rem 0 0;">love, <span class="signature">your baby lans pogi</span></p>
+      </div>
+
+      <div style="display:flex;gap:14px;align-items:center;justify-content:space-between;margin-top:20px;">
+        <div style="display:flex;gap:12px;align-items:center">
+          <button class="btn pink" onclick="toggleHeart()">Send a Heart</button>
+          <button class="btn ghost" onclick="toggleNote()" style="min-width: 120px;">Surprise Note</button>
+        </div>
+      </div>
+
+      <div id="surprise" style="display:none;margin-top:16px;">
+        <div class="note">You make my days brighter — thank you for being you.</div>
+      </div>
+
+      <div style="height:12px"></div>
+      <footer>Tip: press "Send a Heart" to make things extra cute ✨</footer>
+
+      <div class="bg-hearts" aria-hidden="true">
+        <i class="h1">❤</i>
+        <i class="h2">❤</i>
+        <i class="h3">❤</i>
+      </div>
+    </main>
+
+    <aside class="side">
+      <div class="mini-card reveal delay">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="photo-frame">
+            <img src="100_0645.JPEG" alt="Profile Picture" style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+          <div>
+            <div class="name-big">Ria <span class="nick"></span></div>
+            <div style="font-size:13px;color:#634b70;margin-top:6px">My Goldie. Sungit. Forever favorite.</div>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><strong>∞</strong><span>Hugs</span></div>
+          <div class="stat"><strong>100%</strong><span>Love</span></div>
+          <div class="stat"><strong>1</strong><span>Only you</span></div>
+        </div>
+      </div>
+
+      <div class="mini-card reveal delay">
+        <h3 style="margin:0 0 12px 0;color:#4a2f5a">More to Explore</h3>
+        <div style="display:flex; flex-direction: column; gap: 10px;">
+          <!-- The buttons are now here -->
+          <button class="btn ghost" onclick="openPhotobook()" style="width: 100%; text-align: left; padding-left: 16px;">📖 Our Photobook</button>
+          <button class="btn ghost" onclick="openGame()" style="width: 100%; text-align: left; padding-left: 16px;">🎮 Matching Game</button>
+        </div>
+      </div>
+
+      <div class="mini-card reveal delay">
+        <h3 style="margin:0 0 12px 0;color:#4a2f5a">How's your mood today?</h3>
+        <div class="mood-slider-container">
+          <span>😔</span>
+          <input type="range" id="mood-slider-input" min="0" max="100" value="50" class="mood-slider" oninput="handleMoodChange(this)">
+          <span>😊</span>
+        </div>
+        <p id="mood-message" style="text-align: center; font-size: 0.8rem; color: #634b70; margin: 8px 0 0;">Let me know how you're feeling!</p>
+      </div>
+  </div>
+
+  <script>
+    // playful interactions: add floating hearts and reveal note
+    function toggleNote(){
+      const el = document.getElementById('surprise');
+      el.style.display = el.style.display === 'none' ? 'block' : 'none';
+      if(el.style.display==='block') el.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+
+    function openPhotobook() {
+      window.location.href = 'photobook.html';
+    }
+
+    function openGame() {
+      window.location.href = 'game.html';
+    }
+
+    function handleMoodChange(slider) {
+      const value = parseInt(slider.value);
+      const messageEl = document.getElementById('mood-message');
+
+      // Update slider background
+      slider.style.background = `linear-gradient(90deg, #e6d4f0 ${value}%, #f9f4fc ${value}%)`;
+
+      // Update message based on value
+      if (value < 30) {
+        messageEl.textContent = "'wag na po u sad, sending you hugs and kisses. 🤗";
+      } else if (value < 70) {
+        messageEl.textContent = "hope you're having a great day po!.";
+      } else {
+        messageEl.textContent = "good to know that you're happy!. ❤️";
+      }
+    }
+
+    function toggleHeart(){
+      const heart = document.createElement('div');
+      heart.textContent = '💖';
+      heart.style.position='fixed';
+      heart.style.left = (20 + Math.random()*60) + '%';
+      heart.style.top = (20 + Math.random()*60) + '%';
+      heart.style.fontSize = (18 + Math.random()*30) + 'px';
+      heart.style.opacity = 1;
+      heart.style.pointerEvents='none';
+      heart.style.transform = 'translateY(0) rotate('+ (Math.random()*40-20) +'deg)';
+      document.body.appendChild(heart);
+      const travel = 80 + Math.random()*60;
+      const dur = 1800 + Math.random()*1200;
+      heart.animate([
+        { transform: heart.style.transform + ' translateY(0)', opacity:1 },
+        { transform: heart.style.transform + ' translateY(-'+travel+'px)', opacity:0 }
+      ],{duration:dur, easing:'cubic-bezier(.2,.8,.3,1)'}).onfinish = ()=> heart.remove();
+    }
+
+    // subtle random positions for background hearts
+    (function placeBg(){
+      const items = document.querySelectorAll('.bg-hearts i');
+      items.forEach((it,idx)=>{
+        const left = Math.random()*80; const top = Math.random()*80;
+        it.style.left = left + '%'; it.style.top = top + '%';
+        it.style.opacity = 0.2 + Math.random()*0.6;
+        it.style.fontSize = (20 + Math.random()*40) + 'px';
+      })
+    })();
+
+  </script>
+</body>
+</html>
