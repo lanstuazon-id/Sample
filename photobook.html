@@ -385,6 +385,7 @@
   let currentPageIndex = 0;
   let isFlipping = false;
   const book = document.querySelector('.book');
+  const bookContainer = document.querySelector('.book-container');
   const music = document.getElementById('background-music');
   const leftPhoto = document.getElementById('left-photo');
   const leftCaption = document.getElementById('left-caption');
@@ -412,6 +413,10 @@
     `;
   }
 
+  function isMobileView() {
+    return window.innerWidth <= 768;
+  }
+
   function updateBook(instant = false) {
     if (!book.classList.contains('open')) {
       prevBtn.style.visibility = 'hidden';
@@ -419,40 +424,58 @@
       pageCounter.textContent = '';
       return;
     }
-    // Left page is now the inside of the cover or a content page
-    const leftData = pagesData[currentPageIndex - 1];
-    if (leftData) {
-      leftPhoto.innerHTML = leftData.image ? `<img src="${leftData.image}" alt="${leftData.caption}">` : `Page ${currentPageIndex}`;
-      leftCaption.textContent = leftData.caption;
-    } else {
-      // This is the inside of the cover
-      leftPhoto.innerHTML = '';
-      leftCaption.textContent = '';
-    }
 
-    // Right page is the next page
-    const rightData = pagesData[currentPageIndex];
-    if (rightData) {
-      rightPhoto.innerHTML = rightData.image ? `<img src="${rightData.image}" alt="${rightData.caption}">` : `Page ${currentPageIndex + 1}`;
-      rightCaption.textContent = rightData.caption;
-      document.querySelector('.right-page').style.visibility = 'visible';
+    if (isMobileView()) {
+      // --- Mobile: Single Page View ---
+      const currentData = pagesData[currentPageIndex];
+      if (currentData) {
+        leftPhoto.innerHTML = currentData.image ? `<img src="${currentData.image}" alt="${currentData.caption}">` : `Page ${currentPageIndex + 1}`;
+        leftCaption.textContent = currentData.caption;
+      }
+      pageCounter.textContent = `Page ${currentPageIndex + 1} of ${pagesData.length}`;
+      prevBtn.disabled = currentPageIndex === 0;
+      nextBtn.disabled = currentPageIndex >= pagesData.length - 1;
     } else {
-      document.querySelector('.right-page').style.visibility = 'hidden';
+      // --- Desktop: Two Page View ---
+      const leftData = pagesData[currentPageIndex - 1];
+      if (leftData) {
+        leftPhoto.innerHTML = leftData.image ? `<img src="${leftData.image}" alt="${leftData.caption}">` : `Page ${currentPageIndex}`;
+        leftCaption.textContent = leftData.caption;
+      } else {
+        leftPhoto.innerHTML = ''; // Inside cover
+        leftCaption.textContent = '';
+      }
+
+      const rightData = pagesData[currentPageIndex];
+      if (rightData) {
+        rightPhoto.innerHTML = rightData.image ? `<img src="${rightData.image}" alt="${rightData.caption}">` : `Page ${currentPageIndex + 1}`;
+        rightCaption.textContent = rightData.caption;
+        document.querySelector('.right-page').style.visibility = 'visible';
+      } else {
+        document.querySelector('.right-page').style.visibility = 'hidden';
+      }
+      const pageText = leftData ? `${currentPageIndex}-${currentPageIndex + 1}` : `1`;
+      pageCounter.textContent = `Page ${pageText} of ${pagesData.length}`;
+      prevBtn.disabled = currentPageIndex === 0;
+      nextBtn.disabled = currentPageIndex >= pagesData.length - 1;
     }
 
     // Update navigation
     prevBtn.style.visibility = 'visible';
     nextBtn.style.visibility = 'visible';
-    const pageText = leftData ? `${currentPageIndex}-${currentPageIndex + 1}` : `1`;
-    pageCounter.textContent = `Page ${pageText} of ${pagesData.length}`;
-    prevBtn.disabled = currentPageIndex === 0;
-    nextBtn.disabled = currentPageIndex >= pagesData.length -1;
   }
 
   prevBtn.addEventListener('click', () => {
     if (isFlipping) return;
 
-    if (currentPageIndex === 0) {
+    if (isMobileView()) {
+      if (currentPageIndex > 0) {
+        currentPageIndex--;
+        updateBook(true);
+      }
+    } else {
+      // Desktop logic
+      if (currentPageIndex === 0) {
       // Close the book
       book.classList.remove('open');
       music.pause(); // Pause the music
@@ -462,44 +485,46 @@
         updateBook(true);
       }, 1000);
       return;
+      }
+
+      if (currentPageIndex <= 0) return;
+
+      isFlipping = true;
+      document.querySelector('.left-page').style.visibility = 'hidden';
+      
+      const prevLeftData = pagesData[currentPageIndex - 1];
+      const prevRightData = pagesData[currentPageIndex];
+
+      flipFrontContent.innerHTML = createPageContent(prevRightData, currentPageIndex + 1);
+      flipBackContent.innerHTML = createPageContent(prevLeftData, currentPageIndex);
+
+      flippingPage.classList.add('reverse');
+
+      setTimeout(() => {
+        flippingPage.classList.add('turn-back');
+      }, 10);
+
+      setTimeout(() => {
+        currentPageIndex -= 2;
+        updateBook(true);
+        flippingPage.classList.remove('reverse', 'turn-back');
+        document.querySelector('.left-page').style.visibility = 'visible';
+        isFlipping = false;
+      }, 810);
     }
-
-    if (currentPageIndex <= 0) return;
-
-    isFlipping = true;
-
-    // Hide the static left page content
-    document.querySelector('.left-page').style.visibility = 'hidden';
-    
-    // 1. Prepare the flipping page content for reverse flip
-    const prevLeftData = pagesData[currentPageIndex - 1];
-    const prevRightData = pagesData[currentPageIndex];
-
-    flipFrontContent.innerHTML = createPageContent(prevRightData, currentPageIndex + 1);
-    flipBackContent.innerHTML = createPageContent(prevLeftData, currentPageIndex);
-
-    // 2. Position the flipping page for reverse animation
-    flippingPage.classList.add('reverse');
-
-    // 3. Start the animation
-    setTimeout(() => {
-      flippingPage.classList.add('turn-back');
-    }, 10); // Small delay to ensure CSS is applied
-
-    // 4. After animation, update the book state
-    setTimeout(() => {
-      currentPageIndex -= 2;
-      updateBook(true);
-
-      // Reset the flipping page
-      flippingPage.classList.remove('reverse', 'turn-back');
-      document.querySelector('.left-page').style.visibility = 'visible';
-      isFlipping = false;
-    }, 810); // Must match the transition duration
   });
 
   nextBtn.addEventListener('click', () => {
-    if (currentPageIndex >= pagesData.length -1 || isFlipping) {
+    if (isFlipping) return;
+
+    if (isMobileView()) {
+      if (currentPageIndex < pagesData.length - 1) {
+        currentPageIndex++;
+        updateBook(true);
+      }
+    } else {
+      // Desktop logic
+      if (currentPageIndex >= pagesData.length - 1) {
       return;
     }
     isFlipping = true;
@@ -531,6 +556,7 @@
       }
       isFlipping = false;
     }, 800); // Must match the transition duration in CSS
+    }
   });
 
   cover.addEventListener('click', () => {
@@ -542,6 +568,11 @@
       isFlipping = false;
       updateBook(true);
     }, 1000); // Corresponds to cover animation
+  });
+
+  // Re-check layout on window resize
+  window.addEventListener('resize', () => {
+    updateBook(true);
   });
 
   // Initial load
